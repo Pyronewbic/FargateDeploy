@@ -6,6 +6,6 @@ app.get('/', function(req, res){
     res.send('Hello World');
 });
 
-app.listen(3000,()=>{
+app.listen(port,()=>{
     console.log(`Running on port ${port}`)
 })

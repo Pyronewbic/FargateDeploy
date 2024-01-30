@@ -94,5 +94,5 @@ jobs:
         cluster: ${{ env.ECS_CLUSTER }}
         wait-for-service-stability: true
         codedeploy-appspec: .aws/appspec.json
-        codedeploy-application: test
-        codedeploy-deployment-group: test-deploy
+        codedeploy-application: frontend
+        codedeploy-deployment-group: frontend-dg

@@ -3,6 +3,7 @@ def NS = null
 def errorMessage = null
 def gitCommit = null
 def builds = [:]
+def sha = null
 
 pipeline {
     agent any

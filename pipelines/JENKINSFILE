@@ -48,7 +48,7 @@ pipeline {
                         sh """aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin $ECR_URL
                         docker pull $ECR_URL/$REPO:latest
                         echo 'Killing other containers'
-                        docker rm -f $(docker ps -aq)
+                        docker rm -f \$(docker ps -aq)
                         docker run -p 80:80 -d $ECR_URL/$REPO:latest
                         """
                     }catch(exec){

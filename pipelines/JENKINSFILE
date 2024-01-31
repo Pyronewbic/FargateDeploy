@@ -2,7 +2,6 @@ def ENV_LABEL = null
 def NS = null
 def errorMessage = null
 def gitCommit = null
-def sha = null
 def builds = [:]
 
 pipeline {

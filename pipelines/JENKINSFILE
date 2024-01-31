@@ -6,7 +6,8 @@ pipeline {
     }
     environment {
         NODE_OPTIONS = "--max-old-space-size=3096"
-        ECR_URL = "046074525506.dkr.ecr.ap-south-1.amazonaws.com"
+        REGION = "ap-south-1"
+        ECR_URL = "046074525506.dkr.ecr.${REGION}.amazonaws.com"
         REPO = "test"
     }
 

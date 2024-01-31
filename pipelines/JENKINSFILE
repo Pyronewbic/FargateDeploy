@@ -2,6 +2,7 @@ def ENV_LABEL = null
 def NS = null
 def errorMessage = null
 def gitCommit = null
+def sha = null
 def builds = [:]
 
 pipeline {
@@ -46,10 +47,12 @@ pipeline {
                 script{
                     try{
                         sh """aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin $ECR_URL
-                        docker pull 046074525506.dkr.ecr.ap-south-1.amazonaws.com/test:9d77da1cafa3449daebd3d5f890c904735c0fade
+                        sha = $(aws ecr describe-images --repository-name $REPO --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]' --output text)
+                        echo 'Latest image Sha is $sha"
+                        docker pull $ECR_URL/$REPO:$sha
                         echo 'Killing other containers'
                         docker rm -f \$(docker ps -aq)
-                        docker run -p 80:80 -d 046074525506.dkr.ecr.ap-south-1.amazonaws.com/test:9d77da1cafa3449daebd3d5f890c904735c0fade
+                        docker run -p 80:80 -d $ECR_URL/$REPO:$sha
                         """
                     }catch(exec){
                         errorMessage = "Jenkins Failed during BuildImage stage"

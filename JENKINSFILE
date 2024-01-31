@@ -1,0 +1,76 @@
+def ENV_LABEL = null
+def NS = null
+def errorMessage = null
+def gitCommit = null
+def builds = [:]
+
+pipeline {
+    agent any
+    options { 
+        skipDefaultCheckout() 
+        timeout(time: 30, unit: 'MINUTES')    
+    }
+    environment {
+        NODE_OPTIONS = "--max-old-space-size=3096"
+        ECR_URL = "046074525506.dkr.ecr.ap-south-1.amazonaws.com"
+        REPO = "test"
+    }
+
+    stages{
+
+        stage('SCM: Checkout Code'){
+            steps{
+                script{
+                    cleanWs()
+                    checkout scm
+                    sh 'printenv'
+                }
+                
+            }
+        }
+
+        stage('Docker: Delete Image(s)'){
+            steps{
+                script{
+                    sh """
+                        echo 'Deleting All Images except the latest tag'
+                        docker images | awk -v N=2 '++freq[\$1] <= N'
+                        docker images | docker rmi -f \$(awk -v N=2 '++freq[\$1] > N {print \$3}') || true
+                    """
+                }
+            }
+        }
+         
+        stage('Docker: Login To ECR and run image'){
+            steps{
+                script{
+                    try{
+                        sh """aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin $ECR_URL
+                        docker pull $ECR_URL/$REPO:latest
+                        echo 'Killing other containers'
+                        docker rm -f $(docker ps -aq)
+                        docker run -p 80:80 -d $ECR_URL/$REPO:latest
+                        """
+                    }catch(exec){
+                        errorMessage = "Jenkins Failed during BuildImage stage"
+                        sh 'exit 1'
+                    }          
+                    
+                }
+            }
+        }     
+
+    }
+
+    post {
+       always {
+           echo "\n"
+       }
+       success{
+           echo "Nothing messed up, Hallelujah!"
+       }
+       failure {
+           echo "Error: ${errorMessage}"
+       }
+   }
+}

@@ -3,7 +3,6 @@ def NS = null
 def errorMessage = null
 def gitCommit = null
 def builds = [:]
-def sha = null
 
 pipeline {
     agent any
@@ -46,6 +45,8 @@ pipeline {
             steps{
                 script{
                     try{
+                        def sha = sh(script: "aws ecr describe-images --repository-name $REPO --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]' --output text", returnStdout: true).trim()
+                        echo "sha is $sha"
                         sh """aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin $ECR_URL
                         sha = \$(aws ecr describe-images --repository-name $REPO --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]' --output text)
                         echo 'Latest image Sha is $sha"

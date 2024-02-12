@@ -7,4 +7,4 @@ COPY --chown=node:node ["package.json", "package-lock.json", "index.js", "./"]
 
 RUN npm install --omit-dev
 
-CMD [ "index.js","&" ]
+CMD [ "index.js",">","/dev/null","2>","/dev/null","<","/dev/null","&" ]

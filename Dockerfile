@@ -1,10 +1,11 @@
-FROM cgr.dev/chainguard/node
+FROM node:21-alpine3.18
 ENV NODE_ENV=production
 
 WORKDIR /app
 
-COPY --chown=node:node ["package.json", "package-lock.json", "index.js", "./"]
+COPY ["package.json", "package-lock.json", "index.js", "./"]
 
-RUN npm install --omit-dev
+RUN npm install --omit-dev 
+RUN npm i -g pm2
 
-CMD [ "index.js",">","/dev/null","2>","/dev/null","<","/dev/null","&" ]
+CMD ["sh","-c","pm2 start index.js"]

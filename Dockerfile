@@ -8,4 +8,4 @@ COPY ["package.json", "package-lock.json", "index.js", "./"]
 RUN npm install --omit-dev 
 RUN npm i -g pm2
 
-CMD ["sh","-c","pm2 start index.js"]
+CMD ["sh","-c","pm2 start index.js && exit 0"]

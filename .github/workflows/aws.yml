@@ -35,7 +35,7 @@ env:
   ECR_REPOSITORY: 046074525506.dkr.ecr.ap-south-1.amazonaws.com/test # set this to your Amazon ECR repository name
   ECS_SERVICE: test-PrivateIntegrationsTutorialService73010F72-54f4xncXtLWo               # set this to your Amazon ECS service name
   ECS_CLUSTER: test-PrivateIntegrationsTutorialCluster09C95435-S4U5D3q2w5SO              # set this to your Amazon ECS cluster name
-  ECS_TASK_DEFINITION: .aws/taskdef.json # set this to the path to your Amazon ECS task definition
+  ECS_TASK_DEFINITION: .aws/taskdef1.json # set this to the path to your Amazon ECS task definition
                                                # file, e.g. .aws/task-definition.json
   CONTAINER_NAME: web                   # set this to the name of the container in the
                                                # containerDefinitions section of your task definition
@@ -64,19 +64,19 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
 
-    # - name: Build, tag, and push image to Amazon ECR
-    #   id: build-image
-    #   env:
-    #     ECR_REGISTRY: 046074525506.dkr.ecr.ap-south-1.amazonaws.com
-    #     ECR_REPOSITORY: test
-    #     IMAGE_TAG: ${{ github.sha }}
-    #   run: |
-    #     # Build a docker container and
-    #     # push it to ECR so that it can
-    #     # be deployed to ECS.
-    #     docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-    #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-    #     echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+    - name: Build, tag, and push image to Amazon ECR
+      id: build-image
+      env:
+        ECR_REGISTRY: 046074525506.dkr.ecr.ap-south-1.amazonaws.com
+        ECR_REPOSITORY: test
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        # Build a docker container and
+        # push it to ECR so that it can
+        # be deployed to ECS.
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
     - name: Fill in the new image ID in the Amazon ECS task definition
       id: task-def
@@ -84,7 +84,7 @@ jobs:
       with:
         task-definition: ${{ env.ECS_TASK_DEFINITION }}
         container-name: ${{ env.CONTAINER_NAME }}
-        image: httpd:2.4
+        image: ${{ steps.build-image.outputs.image }}
 
     - name: Deploy Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
